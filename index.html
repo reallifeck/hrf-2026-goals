@@ -25,8 +25,8 @@
     --delayed-bg: rgba(220,38,38,0.10);
     --complete: #2563eb;
     --complete-bg: rgba(37,99,235,0.10);
-    --not-started: #9ca3af;
-    --not-started-bg: rgba(156,163,175,0.12);
+    --not-started: #eab308;
+    --not-started-bg: rgba(234,179,8,0.12);
 
     --g1: #7c3aed;
     --g2: #e8185e;
@@ -154,7 +154,7 @@
     margin: 0 auto;
     padding: 24px 48px;
     display: grid;
-    grid-template-columns: 220px 1fr 1fr;
+    grid-template-columns: 220px 1fr;
     gap: 32px;
     align-items: start;
   }
@@ -195,24 +195,10 @@
   .gbar-status-row { display: flex; gap: 4px; margin-top: 4px; }
   .gbar-seg { height: 3px; border-radius: 2px; }
 
-  /* Timeline */
-  .timeline-header-row {
-    display: flex; align-items: center;
-    margin-bottom: 6px;
-  }
-  .tl-name-col { width: 130px; flex-shrink: 0; }
-  .tl-quarters { flex: 1; display: grid; grid-template-columns: repeat(4,1fr); }
-  .tl-q-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-align: center; letter-spacing: 0.06em; }
-  .tl-row { display: flex; align-items: center; margin-bottom: 6px; }
-  .tl-row:last-child { margin-bottom: 0; }
-  .tl-name { width: 130px; flex-shrink: 0; font-size: 11px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
-  .tl-track-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 14px; position: relative; overflow: hidden; }
-  .tl-bar { height: 100%; border-radius: 4px; position: absolute; top: 0; transition: all 0.4s ease; }
-  .tl-divider { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.08); pointer-events: none; }
+
 
   @media (max-width: 900px) {
     .viz-inner { grid-template-columns: 1fr; padding: 20px; gap: 24px; }
-    .viz-timeline { display: none; }
   }
 
   /* MAIN LAYOUT */
@@ -383,7 +369,7 @@
   .initiatives-table { width: 100%; }
   .initiative-row {
     display: grid;
-    grid-template-columns: 1fr 160px 150px;
+    grid-template-columns: 1fr 150px;
     gap: 0;
     padding: 0 28px;
     border-bottom: 1px solid var(--border);
@@ -449,12 +435,12 @@
   .status-select.at-risk { background: var(--at-risk-bg); color: var(--at-risk); border-color: rgba(245,158,11,0.3); }
   .status-select.delayed { background: var(--delayed-bg); color: var(--delayed); border-color: rgba(239,68,68,0.3); }
   .status-select.complete { background: var(--complete-bg); color: var(--complete); border-color: rgba(59,130,246,0.3); }
-  .status-select.not-started { background: var(--not-started-bg); color: var(--not-started); border-color: var(--border); }
+  .status-select.not-started { background: var(--not-started-bg); color: var(--not-started); border-color: rgba(234,179,8,0.4); }
 
   /* TABLE HEADER */
   .table-header {
     display: grid;
-    grid-template-columns: 1fr 160px 150px;
+    grid-template-columns: 1fr 150px;
     gap: 0;
     padding: 8px 28px;
     background: rgba(255,255,255,0.02);
@@ -472,6 +458,33 @@
     justify-content: center;
   }
   .th:first-child { justify-content: flex-start; padding-left: 0; }
+
+  /* RACI */
+  .raci-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .raci-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-sub);
+  }
+  .raci-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 5px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .raci-R { background: rgba(232,24,94,0.12); color: #e8185e; }
+  .raci-A { background: rgba(124,58,237,0.12); color: #7c3aed; }
+  .raci-C { background: rgba(8,145,178,0.12); color: #0891b2; }
+  .raci-I { background: rgba(107,114,128,0.12); color: #6b7280; }
 
   /* OWNER BADGE */
   .owner-badge {
@@ -595,20 +608,7 @@
       <div id="goalBars"></div>
     </div>
 
-    <!-- RIGHT: Quarterly timeline -->
-    <div class="viz-timeline">
-      <div class="viz-block-label">Quarterly timeline</div>
-      <div class="timeline-header-row">
-        <div class="tl-name-col"></div>
-        <div class="tl-quarters">
-          <div class="tl-q-label">Q1</div>
-          <div class="tl-q-label">Q2</div>
-          <div class="tl-q-label">Q3</div>
-          <div class="tl-q-label">Q4</div>
-        </div>
-      </div>
-      <div id="timelineRows"></div>
-    </div>
+
 
   </div>
 </div>
@@ -751,166 +751,138 @@ const STATUS_CLASS = {
 
 const GOALS = [
   {
-    id: 'g1',
-    num: '1',
-    label: 'GOAL 1',
-    title: 'Fundraising & Institutional Capacity',
-    color: 'g1',
+    id: 'g1', num: '1', label: 'GOAL 1',
+    title: 'Fundraising & Institutional Capacity', color: 'g1',
     sections: [
       {
-        name: 'Revenue & Donor Performance',
-        dept: 'Development',
+        name: 'Revenue & Donor Performance', dept: 'Development',
         initiatives: [
-          { title: 'Achieve $25M in total fundraising revenue in 2026 with a stretch goal of $30M', rationale: 'Balance growth with reasonable projections of donor renewals for budgeting purposes', owner: 'Clark', baseline: '$25M total revenue', target: '$25M ($30M Stretch)', timeline: 'Q1: $2.5M · Q2: $6.7M · Q3: $7.9M · Q4: $8.2M' },
-          { title: 'Submit $40M in total Asks in 2026', rationale: 'Our Asks need to exceed projected revenue to hit our goals', owner: 'Clark', baseline: '$40M', target: '$40M in Asks', timeline: 'Q1: $10M · Q2: $5M · Q3: $10M · Q4: $15M' },
-          { title: 'Increase donor retention from 50% to 65%', rationale: 'Build more long-term relationships and sustainable support', owner: 'Clark', baseline: '50%', target: '65%', timeline: 'Ongoing' },
-          { title: 'Secure one new seven-figure donor or advance a seven-figure prospect to late-stage pipeline', rationale: 'At HRF\'s size we need 7-figure gifts to move the needle on total revenue', owner: 'Clark & Celine', baseline: '—', target: '1 seven-figure donor', timeline: '' }
+          { title: 'Achieve $25M in total fundraising revenue in 2026 with a stretch goal of $30M', rationale: 'Balance growth with reasonable projections of donor renewals for budgeting purposes', baseline: '$25M total revenue', target: '$25M ($30M Stretch)', timeline: 'Q1: $2.5M · Q2: $6.7M · Q3: $7.9M · Q4: $8.2M', R:'Alex', A:'Clark', C:'Celine, Thor', I:'Hugene' },
+          { title: 'Submit $40M in total Asks in 2026', rationale: 'Our Asks need to exceed projected revenue to hit our goals', baseline: '$40M', target: '$40M in Asks', timeline: 'Q1: $10M · Q2: $5M · Q3: $10M · Q4: $15M', R:'Clark', A:'Celine', C:'Alex, Thor', I:'Hugene' },
+          { title: 'Increase donor retention from 50% to 65%', rationale: 'Build more long-term relationships and sustainable support', baseline: '50%', target: '65%', timeline: 'Ongoing', R:'Clark', A:'Sherry', C:'Celine, Alex', I:'Hugene' },
+          { title: 'Secure one new seven-figure donor or advance a seven-figure prospect to late-stage pipeline', rationale: "At HRF's size we need 7-figure gifts to move the needle on total revenue", baseline: '—', target: '1 seven-figure donor', timeline: '', R:'Clark', A:'Celine', C:'Alex', I:'Hugene' }
         ]
       },
       {
-        name: 'Board & Leadership Engagement',
-        dept: 'Development & C-Suite',
+        name: 'Board & Leadership Engagement', dept: 'Development & C-Suite',
         initiatives: [
-          { title: 'Increase Board engagement to refer one donor prospect per Board member per quarter', rationale: 'Referrals are one of the best ways to grow our donor community', owner: 'Clark & Celine', baseline: '—', target: '1 referral/Board member/quarter', timeline: 'Quarterly' },
-          { title: 'Conduct one annual development strategy meeting with Alex and share debrief with Thor in Q2', rationale: 'Combining strategy and systems to better leverage our most valuable relationship builders', owner: 'Clark, Celine, Alex', baseline: '—', target: '1 meeting + debrief by Q2', timeline: 'Q2' }
+          { title: 'Increase Board engagement to refer one donor prospect per Board member per quarter', rationale: 'Referrals are one of the best ways to grow our donor community', baseline: '—', target: '1 referral/Board member/quarter', timeline: 'Quarterly', R:'Celine', A:'Clark', C:'The Board', I:'Hugene' },
+          { title: 'Conduct one annual development strategy meeting with Alex and share debrief with Thor in Q2', rationale: 'Combining strategy and systems to better leverage our most valuable relationship builders', baseline: '—', target: '1 meeting + debrief by Q2', timeline: 'Q2', R:'Clark', A:'Celine', C:'Alex', I:'Hugene' }
         ]
       },
       {
-        name: 'Development Team & Systems',
-        dept: 'Development',
+        name: 'Development Team & Systems', dept: 'Development',
         initiatives: [
-          { title: 'Expand the capacity of the Development team by Q2 2026', rationale: 'Growing HRF revenue will require the Development Team growing in size, skills and experience', owner: 'Clark', baseline: '—', target: 'Expanded team by Q2', timeline: 'Q2' },
-          { title: 'Build a 100-prospect major donor pipeline with documented cultivation plans by Q2', rationale: 'We need to break into new audiences in order to grow', owner: 'Nadeige', baseline: '~40 informal prospects', target: '100 documented prospects', timeline: 'By Q2 2026' },
-          { title: 'Create a fundraising strategy for Oslo Freedom Forum (OFF) and other events by end of Q1', rationale: 'Leveraging our most valuable event/asset in order to grow', owner: 'Nadeige', baseline: '—', target: 'Written strategy delivered', timeline: 'By Q1 2026' }
+          { title: 'Expand the capacity of the Development team by Q2 2026', rationale: 'Growing HRF revenue will require the Development Team growing in size, skills and experience', baseline: '—', target: 'Expanded team by Q2', timeline: 'Q2', R:'Clark', A:'Celine', C:'CK, Sandra', I:'Hugene' },
+          { title: 'Build a 100-prospect major donor pipeline with documented cultivation plans by Q2', rationale: 'We need to break into new audiences in order to grow', baseline: '~40 informal prospects', target: '100 documented prospects', timeline: 'By Q2 2026', R:'Nadeige', A:'Clark', C:'Thor, Celine, Alex', I:'Hugene' },
+          { title: 'Create a fundraising strategy for Oslo Freedom Forum (OFF) and other events by end of Q1', rationale: 'Leveraging our most valuable event/asset in order to grow', baseline: '—', target: 'Written strategy delivered', timeline: 'By Q1 2026', R:'Clark', A:'Nadeige', C:'CK', I:'Hugene' }
         ]
       },
       {
-        name: 'Brand Awareness & External Visibility',
-        dept: 'Marketing & Communications',
+        name: 'Brand Awareness & External Visibility', dept: 'Marketing & Communications',
         initiatives: [
-          { title: 'Increase HRF mentions in top-tier global media by 30%', rationale: 'Increased media presence key to demonstrating thought leadership', owner: 'Andrew, Corinne', baseline: '—', target: '30% increase in media mentions', timeline: 'Ongoing' },
-          { title: 'Grow HRF digital community (email subscribers, social followers, web traffic) by 30%', rationale: '', owner: '—', baseline: '—', target: '30% growth across channels', timeline: 'Ongoing' },
-          { title: 'Improve engagement of digital communications — double avg clickrate on emails, social engagements, and pages visited on website', rationale: '', owner: '—', baseline: '—', target: '2x engagement metrics', timeline: 'Ongoing' },
-          { title: 'Develop and implement content strategy to position HRF as leading voice on human rights, policy, technology, and culture', rationale: '', owner: '—', baseline: '—', target: 'Content strategy live', timeline: 'Ongoing' }
+          { title: 'Increase HRF mentions in top-tier global media by 30%', rationale: 'Increased media presence key to demonstrating thought leadership and enhancing awareness of HRF', baseline: '—', target: '30% increase in media mentions', timeline: 'Ongoing', R:'Andrew', A:'Corinne', C:'Ayelen, Camilla', I:'C-Suite' },
+          { title: 'Grow HRF digital community (email subscribers, social followers, web traffic) by 30%', rationale: '', baseline: '—', target: '30% growth across channels', timeline: 'Ongoing', R:'Andrew', A:'Moury', C:'Natalia', I:'Alex' },
+          { title: 'Improve engagement of digital communications — double avg clickrate on emails, social engagements, and pages visited on website', rationale: '', baseline: '—', target: '2x engagement metrics', timeline: 'Ongoing', R:'Andrew', A:'Moury', C:'Natalia', I:'Alex' },
+          { title: 'Develop and implement content strategy to position HRF as leading voice on human rights, policy, technology, and culture', rationale: '', baseline: '—', target: 'Content strategy live', timeline: 'Ongoing', R:'Andrew', A:'Moury', C:'Natalia', I:'Alex' }
         ]
       }
     ]
   },
   {
-    id: 'g2',
-    num: '2',
-    label: 'GOAL 2',
-    title: 'Donor Diversification & Revenue Mix Expansion',
-    color: 'g2',
+    id: 'g2', num: '2', label: 'GOAL 2',
+    title: 'Donor Diversification & Revenue Mix Expansion', color: 'g2',
     sections: [
       {
-        name: 'Donor Pyramid Growth',
-        dept: 'Development',
+        name: 'Donor Pyramid Growth', dept: 'Development',
         initiatives: [
-          { title: 'Increase the number of donors at each level: $100K–$999K: 9→12 · $25K–$99K: 24→28 · $10K–$24.9K: 23→28 · $1K–$9.9K: 105→125', rationale: 'Increase stability and sustainability of HRF\'s revenue streams', owner: 'Clark', baseline: '$100K+: 9 | $25K+: 24 | $10K+: 23 | $1K+: 105', target: '$100K+: 12 | $25K+: 28 | $10K+: 28 | $1K+: 125', timeline: '' }
+          { title: 'Increase donors: $100K–$999K: 10→12 · $25K–$99K: 18→24 · $10K–$24.9K: 12→20 · $1K–$9.9K: 96→115', rationale: "Increase stability and sustainability of HRF's revenue streams", baseline: '$100K+: 10 | $25K+: 18 | $10K+: 12 | $1K+: 96', target: '$100K+: 12 | $25K+: 24 | $10K+: 20 | $1K+: 115', timeline: '', R:'Clark', A:'Celine, Sherry, Nadeige', C:'Alex, Thor', I:'C-Suite' }
         ]
       },
       {
-        name: 'Digital & Community Giving',
-        dept: 'Marketing & Communications',
+        name: 'Digital & Community Giving', dept: 'Marketing & Communications',
         initiatives: [
-          { title: 'Grow small-dollar digital giving by 50% YoY, from $60K to $90K', rationale: 'Support through 30% annual increase in email/social followership; improved data practices', owner: 'Andrew', baseline: '$60K', target: '$90K', timeline: '' },
-          { title: 'Expand pool of potential donors through strategic expansion of HRF community', rationale: '', owner: 'Andrew', baseline: '—', target: 'Expanded community', timeline: '' },
-          { title: 'Develop and execute content strategy to foster community engagement and position HRF for thought leadership on key issues', rationale: '', owner: '—', baseline: '—', target: 'Content strategy executed', timeline: '' }
+          { title: 'Grow small-dollar digital giving by 50% YoY, from $60K to $90K', rationale: 'Support through 30% annual increase in email/social followership; improved data practices', baseline: '$60K', target: '$90K', timeline: '', R:'Andrew', A:'Clark, CK', C:'Celine, Alex', I:'Grace' },
+          { title: 'Expand pool of potential donors through strategic expansion of HRF community', rationale: '', baseline: '—', target: 'Expanded community', timeline: '', R:'Andrew', A:'Clark', C:'Alex, Thor', I:'C-Suite' },
+          { title: 'Develop and execute content strategy to foster community engagement and position HRF for thought leadership on key issues', rationale: '', baseline: '—', target: 'Content strategy executed', timeline: '', R:'Andrew', A:'Moury, Corinne, Camilla', C:'Alex, Per', I:'C-Suite' }
         ]
       },
       {
-        name: 'Events & Sponsorship Revenue',
-        dept: 'Development',
+        name: 'Events & Sponsorship Revenue', dept: 'Development',
         initiatives: [
-          { title: 'Increase OFF ticket sales and sponsorship revenue from $400K to $600K+', rationale: 'Seize opportunity to raise more revenue from HRF\'s most valuable event/asset', owner: 'Clark', baseline: '$400K', target: '$600K+', timeline: '' },
-          { title: 'Increase % of conversion from attendee to donor by 20%', rationale: 'Turn one-time attendees into annual supporters', owner: 'Clark', baseline: 'Current conversion rate', target: '+20% conversion', timeline: '' },
-          { title: 'Expand pool of qualified leads for event attendance through digital and Out of Home marketing', rationale: '', owner: '—', baseline: '—', target: 'Expanded qualified lead pool', timeline: '' }
+          { title: 'Increase OFF ticket sales and sponsorship revenue from $400K to $600K+', rationale: "Seize opportunity to raise more revenue from HRF's most valuable event/asset", baseline: '$400K', target: '$600K+', timeline: '', R:'Clark', A:'CK, Andrew, Sherry', C:'Alex', I:'Celine' },
+          { title: 'Increase % of conversion from attendee to donor by 20%', rationale: 'Turn one-time attendees into annual supporters', baseline: 'Current conversion rate', target: '+20% conversion', timeline: '', R:'Clark', A:'Nadeige, Sherry', C:'Andrew, CK, Alex, Celine', I:'—' },
+          { title: 'Expand pool of qualified leads for event attendance through digital and Out of Home marketing', rationale: '', baseline: '—', target: 'Expanded qualified lead pool', timeline: '', R:'Andrew', A:'Moury', C:'Alex, CK', I:'C-Suite' }
         ]
       },
       {
-        name: 'New Giving Vehicles',
-        dept: 'Development',
+        name: 'New Giving Vehicles', dept: 'Development',
         initiatives: [
-          { title: 'Optimize donation pages to increase conversion rates by 15–20%', rationale: 'We need to build the base of the donor pyramid', owner: '—', baseline: 'Current conversion rate', target: '+15–20% conversion', timeline: '' },
-          { title: 'Launch one international donor circle by Q4 2026 (Asia, Europe, or Latin America)', rationale: 'Build a mechanism to break into new markets', owner: 'Clark & Nadeige', baseline: '—', target: '1 international donor circle launched', timeline: 'By Q4 2026' },
-          { title: 'Develop a family office engagement strategy aligned with democracy and human rights by Q2', rationale: 'Seize opportunity of growth of family offices', owner: 'Clark & Sherry', baseline: '—', target: 'Strategy developed and initiated', timeline: 'By Q2 2026' },
-          { title: 'Plan and launch an HRF Legacy Society for planned giving (wills and estates) in 2026', rationale: 'Give our donors support in making planned-estate gifts to HRF', owner: 'Clark & Nadeige', baseline: '—', target: 'Legacy Society live', timeline: '2026' }
+          { title: 'Optimize donation pages to increase conversion rates by 15–20%', rationale: 'We need to build the base of the donor pyramid', baseline: 'Current conversion rate', target: '+15–20% conversion', timeline: '', R:'—', A:'—', C:'—', I:'—' },
+          { title: 'Launch one international donor circle by Q4 2026 (Asia, Europe, or Latin America)', rationale: 'Build a mechanism to break into new markets', baseline: '—', target: '1 international donor circle launched', timeline: 'By Q4 2026', R:'Clark', A:'Nadeige, Celine', C:'Celine, Alex, Thor, Michelle', I:'Javier, Roberto' },
+          { title: 'Develop a family office engagement strategy aligned with democracy and human rights by Q2', rationale: 'Seize opportunity of growth of family offices', baseline: '—', target: 'Strategy developed and initiated', timeline: 'By Q2 2026', R:'Sherry', A:'Clark, Celine', C:'Javier, Roberto', I:'Alex, Thor' },
+          { title: 'Plan and launch an HRF Legacy Society for planned giving (wills and estates) in 2026', rationale: 'Give our donors support in making planned-estate gifts to HRF', baseline: '—', target: 'Legacy Society live', timeline: '2026', R:'Clark', A:'Nadeige', C:'Celine, Javier, Roberto, Thor', I:'Alex, Thor' }
         ]
       }
     ]
   },
   {
-    id: 'g3',
-    num: '3',
-    label: 'GOAL 3',
-    title: 'Impact Metric Tracking Methodology with Salesforce and Airtable',
-    color: 'g3',
+    id: 'g3', num: '3', label: 'GOAL 3',
+    title: 'Impact Metric Tracking Methodology with Salesforce and Airtable', color: 'g3',
     sections: [
       {
-        name: 'Measurement Tools & Adoption',
-        dept: 'Operations',
+        name: 'Measurement Tools & Adoption', dept: 'Operations',
         initiatives: [
-          { title: 'Drive adoption of Airtable and Salesforce as central points for key organizational data', rationale: 'Remove key impact data out of data silos and make it more durable and accessible', owner: 'Sandra & CK', baseline: 'Siloed spreadsheet tracking', target: 'Airtable + Salesforce adopted org-wide', timeline: 'End of Q1' }
+          { title: 'Drive adoption of Airtable and Salesforce as central points for key organizational data', rationale: 'Remove key impact data out of data silos and make it more durable and accessible', baseline: 'Siloed spreadsheet tracking', target: '80% Airtable adoption · 100% Salesforce designated user adoption', timeline: 'End of Q1', R:'Sandra', A:'CK', C:'MainTask, Tony, Andrew', I:'Celine' }
         ]
       },
       {
-        name: 'Measurement Collection',
-        dept: 'Operations',
+        name: 'Measurement Collection', dept: 'Operations',
         initiatives: [
-          { title: 'Develop impact metric dashboards with data collected', rationale: 'Collect data in the right places so we can use it for strategic decisions and to show impact', owner: 'Sandra & CK', baseline: '—', target: 'Impact dashboards deployed', timeline: 'End of Q2' }
+          { title: 'Develop impact metric dashboards with data collected', rationale: 'Collect data in the right places so we can use it for strategic decisions and to show impact', baseline: '—', target: 'Impact dashboards with quantifiable outcomes for fundraising and reporting', timeline: 'End of Q2', R:'Sandra', A:'CK', C:'Tony, Victoria, Team Leads', I:'Celine' }
         ]
       },
       {
-        name: 'Data Analysis',
-        dept: 'Operations',
+        name: 'Data Analysis', dept: 'Operations',
         initiatives: [
-          { title: 'Enable the organization to become data and metric oriented in its decision making and reporting', rationale: 'To further elevate HRF we need to collect and analyze our work so we can make informed decisions', owner: 'Sandra & CK', baseline: '—', target: 'Org-wide data & metric orientation', timeline: 'End of Q3' }
+          { title: 'Enable the organization to become data and metric oriented in its decision making and reporting', rationale: 'To further elevate HRF we need to collect and analyze our work so we can make informed decisions', baseline: '—', target: 'Org-wide data & metric orientation', timeline: 'End of Q3', R:'Sandra', A:'CK', C:'Tony, Nadeige', I:'Celine' }
         ]
       },
       {
-        name: 'Data Synthesis & Integration',
-        dept: 'Operations',
+        name: 'Data Synthesis & Integration', dept: 'Operations',
         initiatives: [
-          { title: 'Enable org-wide goal setting in the form of KPIs', rationale: 'In order to adopt a KPI framework the org must first be able to measure itself via key impact metrics', owner: 'Sandra & CK', baseline: '—', target: 'HRF Impact Framework launched', timeline: 'End of Q3' }
+          { title: 'Launch an org-wide HRF Impact Framework designed to inform 2027 KPI creation', rationale: 'In order to adopt a KPI framework the org must first be able to measure itself via key impact metrics', baseline: '—', target: 'HRF Impact Framework launched', timeline: 'End of Q3', R:'Sandra', A:'CK', C:'C-Suite', I:'Celine' }
         ]
       },
       {
-        name: 'Data-Driven Goal Setting',
-        dept: 'Operations',
+        name: 'Data-Driven Goal Setting', dept: 'Operations',
         initiatives: [
-          { title: 'Transform the organization into a data-driven and goal-oriented organization', rationale: 'This will enable all business units to function in alignment with what is best for HRF', owner: 'Sandra & CK', baseline: '—', target: '2027 organizational KPIs supported by exec team', timeline: 'End of Q4' }
+          { title: 'Support the Executive Team in developing 2027 organizational KPIs, informed by the collection and analysis of Impact Metrics', rationale: 'Transform the organization into a data-driven and goal-oriented organization', baseline: '—', target: '2027 org KPIs supported by exec team', timeline: 'End of Q4', R:'Sandra', A:'Celine', C:'C-Suite', I:'CK' }
         ]
       }
     ]
   },
   {
-    id: 'g4',
-    num: '4',
-    label: 'GOAL 4',
-    title: 'Cross-Departmental Process Audit & SOP Implementation',
-    color: 'g4',
+    id: 'g4', num: '4', label: 'GOAL 4',
+    title: 'Cross-Departmental Process Audit & SOP Implementation', color: 'g4',
     sections: [
       {
-        name: 'Process Documentation & Audit',
-        dept: 'Operations',
+        name: 'Process Documentation & Audit', dept: 'Operations',
         initiatives: [
-          { title: 'Conduct a cross-departmental process audit of all internal support functions (HR, Finance, Hybrid Work, Operations, Development, Marketing & Comms, Policy & Legal, IT/Digital, Creative)', rationale: 'Enable all programs to benefit from HRF\'s organizational capacity across all functions', owner: 'Sandra & CK', baseline: 'Informal / undocumented processes', target: 'Comprehensive process audit complete', timeline: 'End of Q1' }
+          { title: 'Conduct a cross-departmental process audit of all internal support functions (HR, Finance, Hybrid Work, Operations, Development, Marketing & Comms, Policy & Legal, IT/Digital, Creative)', rationale: "Enable all programs to benefit from HRF's organizational capacity across all functions", baseline: 'Informal / undocumented processes', target: 'Comprehensive process audit complete', timeline: 'End of Q1', R:'Sandra', A:'CK', C:'HR, Finance, Ops, Dev, Mktg, Policy, IT, Creative', I:'C-Suite' }
         ]
       },
       {
-        name: 'Systems & Training',
-        dept: 'Operations',
+        name: 'Systems & Training', dept: 'Operations',
         initiatives: [
-          { title: 'Build a centralized digital SOP library with search functionality and complete info for HRF\'s internal functions', rationale: 'Making SOP documentation internally accessible and durable as a trusted organizational resource', owner: 'Sandra & CK', baseline: '—', target: 'SOP library live with full search functionality', timeline: 'End of Q2' },
-          { title: 'Conduct staff trainings on company SOPs and ensure appropriate access to the company hub', rationale: 'A system is only as good as it is used by our staff', owner: 'Sandra & CK', baseline: '—', target: 'Staff trained on all SOPs', timeline: 'End of Q3' }
+          { title: 'Build a centralized digital SOP library with search functionality and complete info for HRF\'s internal functions', rationale: 'Making SOP documentation internally accessible and durable as a trusted organizational resource', baseline: '—', target: 'SOP library live with full search functionality', timeline: 'End of Q2', R:'Sandra', A:'CK', C:'HR, Finance, Ops, Dev, Mktg, Policy, IT, Creative', I:'C-Suite' },
+          { title: 'Conduct staff trainings on company SOPs and ensure appropriate access to the company hub', rationale: 'A system is only as good as it is used by our staff', baseline: '—', target: 'Staff trained on all SOPs', timeline: 'End of Q3', R:'Sandra', A:'CK', C:'HR, Finance, Ops, Dev, Mktg, Policy, IT, Creative', I:'Entire team' }
         ]
       },
       {
-        name: 'Systems Adoption',
-        dept: 'Operations',
+        name: 'Systems Adoption', dept: 'Operations',
         initiatives: [
-          { title: 'Ensure SOP adoption across the organization', rationale: 'The successful integration and adoption of SOPs will allow the org to manage and benefit from its internal resources better', owner: 'Sandra & CK', baseline: '—', target: 'Org-wide SOP adoption achieved', timeline: 'End of Q4' }
+          { title: 'Ensure SOP adoption across the organization', rationale: 'The successful integration and adoption of SOPs will allow the org to manage and benefit from its internal resources better', baseline: '—', target: 'Org-wide SOP adoption achieved', timeline: 'End of Q4', R:'Sandra', A:'CK', C:'HR, Finance, Ops, Dev, Mktg, Policy, IT, Creative', I:'Entire team' }
         ]
       }
     ]
@@ -985,28 +957,12 @@ const STATUS_COLORS = {
   'At Risk':     '#d97706',
   'Delayed':     '#dc2626',
   'Complete':    '#2563eb',
-  'Not Started': '#e2e6eb'
+  'Not Started': '#eab308'
 };
-const GOAL_COLORS_VIZ = ['#7c3aed','#e8185e','#0891b2','#059669'];
+const GOAL_COLORS_VIZ = ['#9ca3af','#9ca3af','#9ca3af','#9ca3af'];
 const GOAL_NAMES_SHORT = ['Fundraising','Donor Diversification','Impact Metrics','Process Audit'];
 
-// Timeline data: [startQ (0-based), endQ (0-based inclusive), label, goalIdx]
-const TIMELINE_ITEMS = [
-  ['OFF Strategy',          0, 0, 1],
-  ['Donor Pipeline',        0, 1, 0],
-  ['Board Meeting',         1, 1, 0],
-  ['Process Audit',         0, 0, 3],
-  ['SOP Library',           1, 1, 3],
-  ['Airtable Adoption',     0, 0, 2],
-  ['Impact Dashboards',     1, 1, 2],
-  ['Data Analysis',         2, 2, 2],
-  ['Family Office Strategy',1, 1, 1],
-  ['Staff Trainings',       2, 2, 3],
-  ['Donor Circle Launch',   3, 3, 1],
-  ['Legacy Society',        0, 3, 1],
-  ['KPI Framework',         2, 3, 2],
-  ['SOP Adoption',          3, 3, 3],
-];
+
 
 function initDonut() {
   const ctx = document.getElementById('donutChart');
@@ -1055,6 +1011,14 @@ function updateDonut() {
   }
 }
 
+function getProgressColor(pct) {
+  if (pct === 0)       return '#d1d5db';
+  if (pct <= 25)       return '#fbbf24';
+  if (pct <= 50)       return '#fb923c';
+  if (pct <= 75)       return '#4ade80';
+  return '#16a34a';
+}
+
 function updateGoalBars() {
   const el = document.getElementById('goalBars');
   if (!el) return;
@@ -1067,42 +1031,20 @@ function updateGoalBars() {
     }));
     const done = counts['Complete'];
     const pct  = total > 0 ? Math.round((done/total)*100) : 0;
-    const color = GOAL_COLORS_VIZ[gi];
-
-    const segs = Object.entries(STATUS_COLORS).map(([s, c]) => {
-      const w = total > 0 ? ((counts[s]/total)*100).toFixed(1) : 0;
-      return `<div class="gbar-seg" style="flex:${counts[s]};background:${c};min-width:${counts[s]>0?'4px':'0'}"></div>`;
-    }).join('');
+    const dotColor = GOAL_COLORS_VIZ[gi];
+    const barColor = getProgressColor(pct);
 
     return `<div class="gbar-row">
       <div class="gbar-meta">
-        <span class="gbar-name"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:6px;vertical-align:middle"></span>Goal ${gi+1} · ${GOAL_NAMES_SHORT[gi]}</span>
-        <span class="gbar-pct">${pct}%</span>
+        <span class="gbar-name"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-right:6px;vertical-align:middle"></span>Goal ${gi+1} · ${GOAL_NAMES_SHORT[gi]}</span>
+        <span class="gbar-pct" style="color:${barColor}">${pct}%</span>
       </div>
-      <div class="gbar-track"><div class="gbar-fill" style="width:${pct}%;background:${color}"></div></div>
-      <div class="gbar-status-row" style="display:flex;gap:2px;margin-top:3px">${segs}</div>
+      <div class="gbar-track"><div class="gbar-fill" style="width:${pct > 0 ? Math.max(pct,2) : 0}%;background:${barColor}"></div></div>
     </div>`;
   }).join('');
 }
 
-function updateTimeline() {
-  const el = document.getElementById('timelineRows');
-  if (!el) return;
-  el.innerHTML = TIMELINE_ITEMS.map(([name, startQ, endQ, gi]) => {
-    const color = GOAL_COLORS_VIZ[gi];
-    const left  = (startQ / 4 * 100).toFixed(1);
-    const width = ((endQ - startQ + 1) / 4 * 100).toFixed(1);
-    return `<div class="tl-row">
-      <div class="tl-name" title="${name}">${name}</div>
-      <div class="tl-track-wrap">
-        <div class="tl-divider" style="left:25%"></div>
-        <div class="tl-divider" style="left:50%"></div>
-        <div class="tl-divider" style="left:75%"></div>
-        <div class="tl-bar" style="left:${left}%;width:${width}%;background:${color};opacity:0.85"></div>
-      </div>
-    </div>`;
-  }).join('');
-}
+
 
 function updateSummary() {
   const total  = GOALS.reduce((acc, g) => acc + g.sections.reduce((a, s) => a + s.initiatives.length, 0), 0);
@@ -1119,7 +1061,6 @@ function updateSummary() {
 
   updateDonut();
   updateGoalBars();
-  updateTimeline();
 }
 
 function getInitiativeStatus(gi, si, ii) {
@@ -1240,8 +1181,7 @@ function renderGoals() {
               </div>
               <div class="subgoal-body">
                 <div class="table-header">
-                  <div class="th">Initiative</div>
-                  <div class="th">Owner</div>
+                  <div class="th">Initiative &amp; RACI</div>
                   <div class="th">Status</div>
                 </div>
                 <div class="initiatives-table">
@@ -1253,13 +1193,19 @@ function renderGoals() {
                       init.target ? `<span class="target-chip target">Target: ${init.target}</span>` : '',
                       init.timeline ? `<span class="target-chip">📅 ${init.timeline}</span>` : ''
                     ].filter(Boolean).join('');
+                    const raci = [
+                      init.R && init.R !== '—' ? `<span class="raci-chip"><span class="raci-badge raci-R">R</span>${init.R}</span>` : '',
+                      init.A && init.A !== '—' ? `<span class="raci-chip"><span class="raci-badge raci-A">A</span>${init.A}</span>` : '',
+                      init.C && init.C !== '—' ? `<span class="raci-chip"><span class="raci-badge raci-C">C</span>${init.C}</span>` : '',
+                      init.I && init.I !== '—' ? `<span class="raci-chip"><span class="raci-badge raci-I">I</span>${init.I}</span>` : ''
+                    ].filter(Boolean).join('');
                     return `<div class="initiative-row">
                       <div class="col-initiative">
                         <div class="initiative-title">${init.title}</div>
                         ${init.rationale ? `<div class="initiative-detail">${init.rationale}</div>` : ''}
                         ${chips ? `<div class="initiative-targets">${chips}</div>` : ''}
+                        ${raci ? `<div class="raci-row">${raci}</div>` : ''}
                       </div>
-                      <div class="col-owner"><div class="owner-badge">${init.owner}</div></div>
                       <div class="col-status">${makeStatusSelect(k)}</div>
                     </div>`;
                   }).join('')}
